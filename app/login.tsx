@@ -1,9 +1,10 @@
 import { EmbossedForm } from '@/components/EmbossedForm';
-import { useRouter } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, Text, TextInput, useTheme } from 'react-native-paper';
 import { HttpMethod, sendRequest } from '../utils/sendRequest';
+import * as SessionUtils from '../utils/sessionUtils';
 
 const testPayload: {
   method: HttpMethod;
@@ -31,9 +32,17 @@ export default function LoginScreen() {
         }
         console.log(testPayload.payload)
         try {
-            const data = await sendRequest(testPayload);
-            console.log('Response:', data);
-            setResponseData(JSON.stringify(data.user));
+            const res = await sendRequest(testPayload);
+            if (res.ok) {
+                const data = await res.json();
+                setResponseData(JSON.stringify(data));
+                console.log(data)
+                SessionUtils.saveSession('session', data)
+                router.push({pathname: '/home'})
+            } else {
+                const errMsg = await res.text();
+                console.error(`Error ${res.status}: ${errMsg}`);
+            }
         } catch (error) {
             console.error('Request failed:', error);
             setResponseData('Error occurred');
@@ -59,38 +68,9 @@ export default function LoginScreen() {
                 >
                     Login
                 </Button>
-                {responseData && (
-                    <Text>
-                    Response: {responseData}
-                    </Text>
-                )}
+                <Text>New here? <Link href="/signup" style={[styles.text_link, {color: theme.colors.primary}]}>Sign Up</Link>!</Text>
             </EmbossedForm>
         </View>
-        // <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        //     <Text variant="headlineMedium" style={{ color: theme.colors.onBackground }}>Login</Text>
-        //     <TextInput
-        //         label="Email"
-        //         mode="outlined"
-        //         onChangeText={text => setEmail(text)}
-        //     />
-        //     <TextInput
-        //         label="Password"
-        //         secureTextEntry
-        //         mode="outlined"
-        //         onChangeText={text => setPassword(text)}
-        //     />
-        //     <Button
-        //         mode="contained"
-        //         onPress={handleButtonPress}
-        //     >
-        //         Login
-        //     </Button>
-        //     {responseData && (
-        //         <Text>
-        //         Response: {responseData}
-        //         </Text>
-        //     )}
-        // </View>
     );
 }
 
@@ -101,5 +81,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 16,
+  },
+  text_link: {
+    textDecorationLine: 'underline',
+    fontWeight: 'bold',
   },
 });

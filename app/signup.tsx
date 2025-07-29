@@ -1,5 +1,5 @@
 import { EmbossedForm } from '@/components/EmbossedForm';
-import { useRouter } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, Text, TextInput, useTheme } from 'react-native-paper';
@@ -18,7 +18,7 @@ const testPayload: {
 };
 
 
-export default function LoginScreen() {
+export default function SignUpScreen() {
     const theme = useTheme();
     const router = useRouter();
     const [responseData, setResponseData] = useState<string | null>(null);
@@ -51,9 +51,20 @@ export default function LoginScreen() {
             return
         }
         try {
-            const data = await sendRequest(testPayload);
-            console.log('Response:', data);
-            setResponseData(JSON.stringify(data.user));
+            const res = await sendRequest(testPayload);
+            if (res.ok) {
+                const data = await res.json();
+                setResponseData(JSON.stringify(data));
+            }
+            else {
+                if (res.status === 409) {
+                    console.log("User already exists")
+                    router.push('/login')
+                } else {
+                    const errMsg = await res.text();
+                    console.error(`Error ${res.status}: ${errMsg}`);
+                }
+            }
         } catch (error) {
             console.error('Request failed:', error);
             setResponseData('Error occurred');
@@ -88,6 +99,7 @@ export default function LoginScreen() {
                 >
                     Sign Up
                 </Button>
+                <Text>Already have an account? <Link href="/login" style={[styles.text_link, {color: theme.colors.primary}]}>Login</Link></Text>
                 {responseData && (
                     <Text>
                     Response: {responseData}
@@ -113,11 +125,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
   },
-  surface: {
-    padding: 8,
-    height: 400,
-    width: 400,
-    alignItems: 'center',
-    justifyContent: 'center',
-  }
+  text_link: {
+    textDecorationLine: 'underline',
+    fontWeight: 'bold',
+  },
 });

@@ -14,7 +14,7 @@ export async function sendRequest<T = any>({
   path,
   payload,
   headers = {},
-}: RequestOptions): Promise<T> {
+}: RequestOptions): Promise<Response> {
   const url = `${baseUrl}${path}`;
 
   const options: RequestInit = {
@@ -31,18 +31,8 @@ export async function sendRequest<T = any>({
 
   try {
     const response = await fetch(url, options);
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(`HTTP error! status: ${response.status}, message: ${text}`);
-    }
-
-    const contentType = response.headers.get('content-type') ?? '';
-    if (contentType.includes('application/json')) {
-      return (await response.json()) as T;
-    }
-
-    const text = await response.text();
-    return text as unknown as T;
+    
+    return response
   } catch (error) {
     console.error('sendRequest error:', error);
     throw error;
