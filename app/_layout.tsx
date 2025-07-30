@@ -1,12 +1,14 @@
 import { Logout } from '@/utils/authUtils';
 import { Stack, useRouter } from 'expo-router';
-import { useColorScheme } from 'react-native';
-import { Button, PaperProvider } from 'react-native-paper';
+import * as React from 'react';
+import { StyleSheet, useColorScheme, View } from 'react-native';
+import { Button, PaperProvider, Searchbar } from 'react-native-paper';
 import { getTheme } from '../constants/theme';
 
 
 
 export default function RootLayout() {
+  const [searchQuery, setSearchQuery] = React.useState('');
   const colorScheme = useColorScheme() ?? 'light'; // fallback for SSR/dev mode
   const theme = getTheme("light");
   const router = useRouter();
@@ -23,9 +25,17 @@ export default function RootLayout() {
             headerStyle: { backgroundColor: theme.colors.primary},
             headerTintColor: theme.colors.onPrimary,
             headerRight: () => (
-              <Button textColor={theme.colors.onPrimary} onPress={() => { handleLogout(); }} compact>
-                Logout
-              </Button>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Searchbar
+                  placeholder="Search"
+                  style={styles.search}
+                  onChangeText={setSearchQuery}
+                  value={searchQuery}
+                />
+                <Button textColor={theme.colors.onPrimary} onPress={() => { handleLogout(); }} compact>
+                  Logout
+                </Button>
+              </View>
             ),
           }}>
         <Stack.Screen
@@ -38,3 +48,9 @@ export default function RootLayout() {
     </PaperProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  search: {
+    padding: 0,
+  },
+});
