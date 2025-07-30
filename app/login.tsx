@@ -1,4 +1,5 @@
 import { EmbossedForm } from '@/components/EmbossedForm';
+import { RedirectIfAuthenticated } from '@/components/RedirectIfAuthenticated';
 import { Link, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -49,28 +50,30 @@ export default function LoginScreen() {
         }
     }
     return (
-        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <RedirectIfAuthenticated>
+          <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
             <EmbossedForm label="Login">
-                <TextInput
-                    label="Email"
-                    mode="outlined"
-                    onChangeText={text => setEmail(text)}
-                />
-                <TextInput
-                    label="Password"
-                    secureTextEntry
-                    mode="outlined"
-                    onChangeText={text => setPassword(text)}
-                />
-                <Button
-                    mode="contained"
-                    onPress={handleButtonPress}
-                >
-                    Login
-                </Button>
-                <Text>New here? <Link href="/signup" style={[styles.text_link, {color: theme.colors.primary}]}>Sign Up</Link>!</Text>
+              <TextInput
+                  label="Email"
+                  mode="outlined"
+                  onChangeText={text => setEmail(text)}
+              />
+              <TextInput
+                  label="Password"
+                  secureTextEntry
+                  mode="outlined"
+                  onChangeText={text => setPassword(text)}
+              />
+              <Button
+                  mode="contained"
+                  onPress={handleButtonPress}
+              >
+                  Login
+              </Button>
+              <Text>New here? <Link href="/signup" style={[styles.text_link, {color: theme.colors.primary}]}>Sign Up</Link>!</Text>
             </EmbossedForm>
-        </View>
+          </View>
+        </RedirectIfAuthenticated>
     );
 }
 

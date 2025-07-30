@@ -1,4 +1,5 @@
 import { EmbossedForm } from '@/components/EmbossedForm';
+import { RedirectIfAuthenticated } from '@/components/RedirectIfAuthenticated';
 import { Link, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -72,41 +73,43 @@ export default function SignUpScreen() {
     }
 
     return (
-        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-            <EmbossedForm label="Sign Up">
-                <TextInput
-                    label="Email"
-                    mode="outlined"
-                    onChangeText={text => validateEmail(text)}
-                    error={!!emailError} // Show error state for TextInput
-                />
-                <TextInput
-                    label="Password"
-                    secureTextEntry
-                    mode="outlined"
-                    onChangeText={text => setPassword(text)}
-                />
-                <TextInput
-                    label="PasswordConf"
-                    secureTextEntry
-                    mode="outlined"
-                    onChangeText={text => setPasswordConf(text)}
-                    error={password !== passwordConf && passwordConf.length > 0}
-                />
-                <Button
-                    mode="contained"
-                    onPress={handleButtonPress}
-                >
-                    Sign Up
-                </Button>
-                <Text>Already have an account? <Link href="/login" style={[styles.text_link, {color: theme.colors.primary}]}>Login</Link></Text>
-                {responseData && (
-                    <Text>
-                    Response: {responseData}
-                    </Text>
-                )}
-            </EmbossedForm>
-        </View>
+        <RedirectIfAuthenticated>
+            <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+                <EmbossedForm label="Sign Up">
+                    <TextInput
+                        label="Email"
+                        mode="outlined"
+                        onChangeText={text => validateEmail(text)}
+                        error={!!emailError} // Show error state for TextInput
+                    />
+                    <TextInput
+                        label="Password"
+                        secureTextEntry
+                        mode="outlined"
+                        onChangeText={text => setPassword(text)}
+                    />
+                    <TextInput
+                        label="PasswordConf"
+                        secureTextEntry
+                        mode="outlined"
+                        onChangeText={text => setPasswordConf(text)}
+                        error={password !== passwordConf && passwordConf.length > 0}
+                    />
+                    <Button
+                        mode="contained"
+                        onPress={handleButtonPress}
+                    >
+                        Sign Up
+                    </Button>
+                    <Text>Already have an account? <Link href="/login" style={[styles.text_link, {color: theme.colors.primary}]}>Login</Link></Text>
+                    {responseData && (
+                        <Text>
+                        Response: {responseData}
+                        </Text>
+                    )}
+                </EmbossedForm>
+            </View>
+        </RedirectIfAuthenticated>
     );
 }
 

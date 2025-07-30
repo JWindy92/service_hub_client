@@ -1,40 +1,64 @@
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { UserInfo } from '@/components/UserInfo';
+import { Session } from '@/interfaces/auth';
+import { User } from '@/interfaces/user';
+import { sendRequest } from '@/utils/sendRequest';
+import { getSession } from '@/utils/sessionUtils';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Text, useTheme } from 'react-native-paper';
-import * as SessionUtils from '../utils/sessionUtils';
+import { ActivityIndicator, useTheme } from 'react-native-paper';
 
-interface LoginResponse {
-    token: string
-    user: {
-        id: number;
-    };
-}
 
 export default function HomeScreen() {
     const theme = useTheme();
     const router = useRouter();
 
-    const [session, setSession] = useState<LoginResponse | null>(null);
+    // const [session, setSession] = useState<Session | null>(null);
+    const [userData, setUserData] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);  // 👈 Track loading status
 
     useEffect(() => {
         (async () => {
-            const session = await SessionUtils.getSession<LoginResponse>('session');
+            // const valid = await ValidateToken();
+            // if (!valid) {
+            //     router.replace('/login');
+            //     return;
+            // }
+            const session = await getSession<Session>('session'); // Your logic here
             if (session) {
                 // Set to state or navigate
-                console.log('Restored session:', session);
-                setSession(session)
-                // GET full user data
+                // setSession(session)                
+                const res = await sendRequest({
+                    method: 'GET',
+                    baseUrl: 'http://localhost:8080',
+                    path: `/users/${session.user.id}`
+                });
+                const data = await res.json();
+
+                setUserData(data);
             }
+            setLoading(false);
         })();
     }, []);
+    // 
+
+    if (loading) {
+        return (
+            <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+                <ActivityIndicator animating={true} size="large" color={theme.colors.primary} />
+            </View>
+        );
+    }
 
     return (
-        // <PaperProvider>
-        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-            <Text variant="headlineMedium" style={{ color: theme.colors.onBackground }}>Hello! User {session?.user.id} </Text>
-        </View>
-        // </PaperProvider>
+        <ProtectedRoute>
+            <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+
+                {/* <Text variant="headlineMedium" style={{ color: theme.colors.onBackground }}>Welcome back {userData?.Profile?.first_name} </Text> */}
+                {userData && <UserInfo data={userData} />}
+            </View>
+        </ProtectedRoute>
     );
 }
 
